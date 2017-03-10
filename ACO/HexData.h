@@ -7,4 +7,6 @@ struct HexData
 	sf::Vector2i index;
 	int terrain;
 	int threat;
+	float pheromones;
+	bool isFood;
 };

@@ -10,8 +10,8 @@
 #include "Anthill.h"
 
 const bool vsync = true;
-const float screenWidth = 1250.0f;
-const float screenHeight = 900.0f;
+const float screenWidth = 2000;
+const float screenHeight = 1400;
 
 sf::RenderWindow *window;
 std::vector<Renderable*> toRender;

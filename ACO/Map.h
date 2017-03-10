@@ -28,6 +28,7 @@ public:
 	void AddThreat(Agent* threat);
 	void ResetThreat(Agent* toIgnore);
 	std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore);
+	std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 
 private:
 	void GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage);
@@ -38,7 +39,6 @@ private:
 	void DebugRenderThreat(sf::RenderWindow *window);
 	void DebugRenderDifficulty(sf::RenderWindow *window);
 
-	std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 	int GetDifficulty(HexData* HexToTest);
 
 	std::vector<std::vector<HexData*>> hexMap;
