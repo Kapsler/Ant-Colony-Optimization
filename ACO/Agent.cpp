@@ -26,7 +26,6 @@ Agent::Agent(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr
 
 Agent::~Agent()
 {
-	
 }
 
 void Agent::Move()

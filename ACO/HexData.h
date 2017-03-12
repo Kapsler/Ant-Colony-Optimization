@@ -8,5 +8,4 @@ struct HexData
 	int terrain;
 	int threat;
 	float pheromones;
-	bool isFood;
 };

@@ -24,7 +24,7 @@ void GenerateWorld()
 	toRender.push_back(map);
 	toInteract.push_back(map);
 
-	Anthill* anthill = new Anthill("./Assets/anthill.png", sf::Vector2i(3, 3), map);
+	Anthill* anthill = new Anthill("./Assets/anthill.png", sf::Vector2i(20, 12), map);
 	toRender.push_back(anthill);
 	toInteract.push_back(anthill);
 
@@ -34,8 +34,8 @@ int main()
 {
 	//Initialize Random Generator and clock
 	srand(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-	sf::Clock fpsClock, deltaClock;
-	float fpsTime = 0;
+	sf::Clock deltaClock;
+	float fpsDelay = 0;
 
 	//Open Window
 	window = new sf::RenderWindow(sf::VideoMode(static_cast<unsigned int>(screenWidth), static_cast<unsigned int>(screenHeight)), "ACO");
@@ -49,12 +49,12 @@ int main()
 		float deltaTime = deltaClock.restart().asSeconds();
 
 		//Update FPS
-		fpsTime += deltaTime;
-		if (fpsTime > 1.0f)
+		fpsDelay += deltaTime;
+		if (fpsDelay > 1.0f)
 		{
 			float fps = 1.0f / (deltaTime);
 			window->setTitle("ACO (" + std::to_string(static_cast<int>(fps)) + ")");
-			fpsTime = 0.0f;
+			fpsDelay = 0.0f;
 		}
 
 		sf::Event event;
