@@ -34,6 +34,8 @@ public:
 	void SpawnFood(const sf::Vector2i& pos);
 	void DeleteFood(const sf::Vector2i& pos);
 
+	int FindOptimalPath();
+
 	std::unordered_map<std::pair<int, int>, Agent*, SimpleHash> foodSources;
 	std::vector<HexData*> debugDraw;
 

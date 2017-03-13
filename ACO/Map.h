@@ -12,7 +12,6 @@ class Map : public Renderable, public Interactive
 {
 public:
 	explicit Map(float screenWidth, float screenHeight, const std::string& filename);
-	virtual ~Map();
 
 	void Render(sf::RenderWindow* window) override;
 	void DebugRender(sf::RenderWindow* window) override;

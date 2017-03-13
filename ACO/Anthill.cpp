@@ -19,56 +19,92 @@ void Anthill::FindFood()
 {
 	debugDraw.clear();
 
-	std::cout << "Finding Food" << std::endl;
-	float optimalPath = 30;
-	float rho = 0.2f;	
-	
+	float optimalPath = FindOptimalPath();
+	std::cout << optimalPath << std::endl;
+	float rho = 0.2f;
+	std::vector<std::vector<HexData*>> doubleBuffer;
+	std::vector<std::vector<HexData*>> mapptr = *(map->GetMapPtr());
 
-	for(int i = 0; i < numberOfAnts; ++i)
+	doubleBuffer.resize(mapptr.size());
+
+	for(int i = 0; i < doubleBuffer.size(); ++i)
 	{
-		std::vector<HexData*> antPath;
-		std::vector<HexData*> neighbors;
-		sf::Vector2i antPos(positionIndex);
-		bool foundFood = false;
+		doubleBuffer[i].resize(mapptr[i].size());
+	}
 
-		//startpoint
-		antPath.push_back(map->GetHexDatByIndex(antPos.x, antPos.y));
-
-		//Traverse - Begin
-
-		while(!foundFood)
+	for(int i = 0; i < doubleBuffer.size(); ++i)
+	{
+		for (int j = 0; j < doubleBuffer[i].size(); ++j)
 		{
-			neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
-			HexData* nextField = GetNextField(neighbors, antPath);
-			if(nextField == nullptr)
+			doubleBuffer[i][j] = new HexData();
+			*(doubleBuffer[i][j]) = *(mapptr[i][j]);
+		}
+	}
+
+	#pragma omp parallel 
+	{
+	
+		#pragma omp for
+		for(int i = 0; i < numberOfAnts; ++i)
+		{
+			std::vector<HexData*> antPath;
+			std::vector<HexData*> neighbors;
+			sf::Vector2i antPos(positionIndex);
+			bool foundFood = false;
+
+			//startpoint
+			antPath.push_back(map->GetHexDatByIndex(antPos.x, antPos.y));
+
+			//Traverse - Begin
+
+			while(!foundFood)
 			{
-				//No more options
-				break;
+				neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
+				HexData* nextField = GetNextField(neighbors, antPath);
+				if(nextField == nullptr)
+				{
+					//No more options
+					break;
+				}
+
+				antPos = nextField->index;
+				antPath.push_back(nextField);
+
+				if(foodSources.find({antPos.x, antPos.y}) != foodSources.end())
+				{
+					foundFood = true;
+				}
 			}
 
-			antPos = nextField->index;
-			antPath.push_back(nextField);
+			//Traverse - End
 
-			if(foodSources.find({antPos.x, antPos.y}) != foodSources.end())
+			//Mark - Begin
+			if(foundFood)
 			{
-				foundFood = true;
+				for(auto h : antPath)
+				{
+					#pragma omp critical
+					{
+						doubleBuffer[h->index.x][h->index.y]->pheromones += optimalPath / static_cast<float>(antPath.size());
+					}
+				}
 			}
+
+			//Mark - End
 		}
 
-		//debugDraw.insert(debugDraw.begin(), antPath.begin(), antPath.end());
-		//Traverse - End
-		//Mark - Begin
 
-		if(foundFood)
+	}
+
+	mapptr = *map->GetMapPtr();
+
+	for (int i = 0; i < doubleBuffer.size(); ++i)
+	{
+		for (int j = 0; j < doubleBuffer[i].size(); ++j)
 		{
-			for(auto h : antPath)
-			{
-				h->pheromones += optimalPath / static_cast<float>(antPath.size());
-			}
+			*(mapptr[i][j]) = *(doubleBuffer[i][j]);
+			delete doubleBuffer[i][j];
 		}
-
-
-		//Mark - End
 	}
 
 
@@ -199,7 +235,7 @@ void Anthill::Render(sf::RenderWindow* window)
 			{
 				pheromoneHex = *h->hex;
 				pheromoneHex.setOutlineColor(sf::Color::Transparent);
-				float alpha = std::min((255.0f * (h->pheromones / static_cast<float>(numberOfAnts))), 255.0f);
+				float alpha = std::min(255.0f * (h->pheromones / static_cast<float>(numberOfAnts)), 255.0f);
 				pheromoneHex.setFillColor(sf::Color(127, 0, 255, alpha));
 				window->draw(pheromoneHex);
 			}
@@ -248,4 +284,21 @@ void Anthill::DeleteFood(const sf::Vector2i& pos)
 	delete foodSources.at({ pos.x, pos.y });
 	foodSources.erase({ pos.x, pos.y });
 
+}
+
+int Anthill::FindOptimalPath()
+{
+	int shortestPath = INT_MAX;
+
+	for(auto it = foodSources.begin(); it != foodSources.end(); ++it)
+	{
+		int pathlength = map->AStarPath(map->GetHexDatByIndex(positionIndex.x, positionIndex.y), map->GetHexDatByIndex(it->first.first, it->first.second), *map->GetMapPtr(), nullptr).size();
+
+		if(pathlength < shortestPath)
+		{
+			shortestPath = pathlength;
+		}
+	}
+
+	return shortestPath;
 }

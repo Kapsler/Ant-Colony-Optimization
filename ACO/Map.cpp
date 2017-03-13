@@ -17,17 +17,6 @@ Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 	debugText.setOutlineColor(sf::Color::Black);
 }
 
-Map::~Map()
-{
-	for (auto line : hexMap)
-	{
-		for (auto hex : line)
-		{
-			delete hex;
-		}
-	}
-}
-
 void Map::Render(sf::RenderWindow* window)
 {
 	ResetThreat(nullptr);
