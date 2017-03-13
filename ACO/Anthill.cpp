@@ -56,10 +56,14 @@ void Anthill::FindFood()
 
 			//Traverse - Begin
 
+			std::vector<std::pair<float, HexData*>> possibleFields;
+			possibleFields.reserve(6);
+
 			while(!foundFood)
 			{
+				possibleFields.clear();
 				neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
-				HexData* nextField = GetNextField(neighbors, cameFrom);
+				HexData* nextField = GetNextField(neighbors, cameFrom, possibleFields);
 				if(nextField == nullptr)
 				{
 					//No more options
@@ -128,11 +132,9 @@ void Anthill::FindFood()
 
 }
 
-HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited)
+HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited, std::vector<std::pair<float, HexData*>>& possibleFields)
 {
 	HexData* nextField = nullptr;
-	std::vector<std::pair<float, HexData*>> possibleFields;
-	possibleFields.reserve(6);
 
 	//Find scaling factor
 	float scalingFactor = 0;

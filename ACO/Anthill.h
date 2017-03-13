@@ -12,7 +12,7 @@ public:
 	~Anthill();
 
 	void FindFood();
-	HexData* GetNextField(std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited);
+	HexData* GetNextField(std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited, std::vector<std::pair<float, HexData*>>& possibleFields);
 
 	virtual void HandleKeyboard(sf::Keyboard::Key key);
 	virtual void HandleMouse(sf::Vector2f& mousePosition);
