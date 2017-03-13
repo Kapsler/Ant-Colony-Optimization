@@ -128,7 +128,7 @@ void Anthill::FindFood()
 
 }
 
-HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited)
+HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited)
 {
 	HexData* nextField = nullptr;
 	std::vector<std::pair<float, HexData*>> possibleFields;
@@ -138,39 +138,41 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 	float scalingFactor = 0;
 	float a = 1.5f, b = 1.0f;
 
-	for (const auto& n : neighbors)
+	auto it = neighbors.begin();
+	while(it != neighbors.end())
 	{
-		if (visited.find(n) == visited.end() && n->terrain < map->unpassable)
+		if (visited.find(*it) == visited.end() && (*it)->terrain < map->unpassable)
 		{
-			float pher = n->pheromones;
+				float pher = (*it)->pheromones;
 
-			if (pher == 0)
-			{
-				pher = 0.00001f;
-			}
+				if (pher == 0)
+				{
+					pher = 0.00001f;
+				}
 
-			scalingFactor += (pow(pher, a) * pow((1.0f/n->terrain),b));
-
+				scalingFactor += (fastPow(pher, a) * fastPow((1.0f / (*it)->terrain), b));
+			++it;
+		} else
+		{
+			it = neighbors.erase(it);
 		}
 	}
 
 	//get possibilities per field
 	for(const auto& n : neighbors)
 	{
-		if(visited.find(n) == visited.end() && n->terrain < map->unpassable)
+		float p = 0;
+		float pher = n->pheromones;
+
+		if (pher == 0)
 		{
-			float p = 0;
-			float pher = n->pheromones;
-
-			if (pher == 0)
-			{
-				pher = 0.00001f;
-			}
-
-			p = (pow(pher, a) * pow((1.0f / n->terrain), b)) / (scalingFactor);
-
-			possibleFields.push_back({ p, n });
+			pher = 0.00001f;
 		}
+
+		p = (fastPow(pher, a) * fastPow((1.0f / n->terrain), b)) / (scalingFactor);
+
+		possibleFields.push_back({ p, n });
+		
 	}
 
 	//Choose random field by possibility
@@ -193,10 +195,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 
 void Anthill::HandleKeyboard(sf::Keyboard::Key key)
 {
-	if(key == sf::Keyboard::Key::M)
-	{
-		FindFood();
-	}
+
 }
 
 void Anthill::HandleMouse(sf::Vector2f& mousePosition)

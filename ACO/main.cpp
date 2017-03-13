@@ -9,7 +9,7 @@
 #include <chrono>
 #include "Anthill.h"
 
-const bool vsync = true;
+const bool vsync = false;
 const float screenWidth = 2000;
 const float screenHeight = 1400;
 
@@ -102,9 +102,11 @@ int main()
 
 		}
 
+	
+
 		//Movement
 		moveDelay += deltaTime;
-		if (moveDelay > 0.05f)
+		if (moveDelay > 0.0001f)
 		{
 			for (auto& m : toMove)
 			{
