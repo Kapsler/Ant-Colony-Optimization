@@ -46,28 +46,28 @@ void Anthill::FindFood()
 		#pragma omp for
 		for(int i = 0; i < numberOfAnts; ++i)
 		{
-			std::vector<HexData*> antPath;
+			std::unordered_map<HexData*, HexData*> cameFrom;
 			std::vector<HexData*> neighbors;
 			sf::Vector2i antPos(positionIndex);
 			bool foundFood = false;
 
 			//startpoint
-			antPath.push_back(map->GetHexDatByIndex(antPos.x, antPos.y));
+			cameFrom.insert_or_assign(nullptr, map->GetHexDatByIndex(antPos.x, antPos.y));
 
 			//Traverse - Begin
 
 			while(!foundFood)
 			{
 				neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
-				HexData* nextField = GetNextField(neighbors, antPath);
+				HexData* nextField = GetNextField(neighbors, cameFrom);
 				if(nextField == nullptr)
 				{
 					//No more options
 					break;
 				}
 
+				cameFrom.insert_or_assign(map->GetHexDatByIndex(antPos.x, antPos.y), nextField);
 				antPos = nextField->index;
-				antPath.push_back(nextField);
 
 				if(foodSources.find({antPos.x, antPos.y}) != foodSources.end())
 				{
@@ -80,11 +80,11 @@ void Anthill::FindFood()
 			//Mark - Begin
 			if(foundFood)
 			{
-				for(auto h : antPath)
+				for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
 				{
 					#pragma omp critical
 					{
-						doubleBuffer[h->index.x][h->index.y]->pheromones += optimalPath / static_cast<float>(antPath.size());
+						doubleBuffer[it->second->index.x][it->second->index.y]->pheromones += optimalPath / static_cast<float>(cameFrom.size());
 					}
 				}
 			}
@@ -128,7 +128,7 @@ void Anthill::FindFood()
 
 }
 
-HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std::vector<HexData*>& visited)
+HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std::unordered_map<HexData*, HexData*>& visited)
 {
 	HexData* nextField = nullptr;
 	std::vector<std::pair<float, HexData*>> possibleFields;
@@ -140,7 +140,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 
 	for (const auto& n : neighbors)
 	{
-		if (std::find(visited.begin(), visited.end(), n) == visited.end() && n->terrain < map->unpassable)
+		if (visited.find(n) == visited.end() && n->terrain < map->unpassable)
 		{
 			float pher = n->pheromones;
 
@@ -157,7 +157,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 	//get possibilities per field
 	for(const auto& n : neighbors)
 	{
-		if(std::find(visited.begin(), visited.end(), n) == visited.end() && n->terrain < map->unpassable)
+		if(visited.find(n) == visited.end() && n->terrain < map->unpassable)
 		{
 			float p = 0;
 			float pher = n->pheromones;
