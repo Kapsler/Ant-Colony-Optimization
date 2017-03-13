@@ -20,7 +20,6 @@ void Anthill::FindFood()
 	debugDraw.clear();
 
 	float optimalPath = FindOptimalPath();
-	std::cout << optimalPath << std::endl;
 	float rho = 0.2f;
 	std::vector<std::vector<HexData*>> doubleBuffer;
 	std::vector<std::vector<HexData*>> mapptr = *(map->GetMapPtr());
@@ -114,7 +113,7 @@ void Anthill::FindFood()
 	{
 		for (auto h : line)
 		{
-			if (h->pheromones > 0.001f)
+			if (h->pheromones > 0.1f)
 			{
 				h->pheromones = (1 - rho) * h->pheromones;
 			} else
@@ -137,6 +136,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 
 	//Find scaling factor
 	float scalingFactor = 0;
+	float a = 1.5f, b = 1.0f;
 
 	for (const auto& n : neighbors)
 	{
@@ -149,7 +149,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 				pher = 0.00001f;
 			}
 
-			scalingFactor += (pher * (1.0f/n->terrain));
+			scalingFactor += (pow(pher, a) * pow((1.0f/n->terrain),b));
 
 		}
 	}
@@ -167,7 +167,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 				pher = 0.00001f;
 			}
 
-			p = (pher * (1.0f / n->terrain)) / (scalingFactor);
+			p = (pow(pher, a) * pow((1.0f / n->terrain), b)) / (scalingFactor);
 
 			possibleFields.push_back({ p, n });
 		}
@@ -186,7 +186,6 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 		} 
 
 		randVal -= f.first;
-		
 	}
 
 	return nextField;
@@ -247,16 +246,6 @@ void Anthill::Render(sf::RenderWindow* window)
 	{
 		it->second->Render(window);
 	}
-
-
-
-	//Hexagon drawhex;
-	//for(auto it = debugDraw.begin(); it != debugDraw.end(); ++it)
-	//{
-	//	drawhex = *(*it)->hex;
-	//	drawhex.setFillColor(sf::Color(255,0,0,255.0f/1.0f));
-	//	window->draw(drawhex);
-	//}
 }
 
 void Anthill::Move()
