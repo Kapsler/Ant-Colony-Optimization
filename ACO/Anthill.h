@@ -16,7 +16,7 @@ public:
 		}
 	};
 
-	const int numberOfAnts = 1;
+	const int numberOfAnts = 1000;
 
 	Anthill(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr);
 	~Anthill();
@@ -28,9 +28,15 @@ public:
 	virtual void HandleMouse(sf::Vector2f& mousePosition);
 	virtual void HandleMouse(sf::Mouse::Button mb);
 	virtual void Render(sf::RenderWindow* window);
+	virtual void Move() override;
+	void DebugRender(sf::RenderWindow* window) override;
 
 	void SpawnFood(const sf::Vector2i& pos);
 	void DeleteFood(const sf::Vector2i& pos);
 
 	std::unordered_map<std::pair<int, int>, Agent*, SimpleHash> foodSources;
+	std::vector<HexData*> debugDraw;
+
+	sf::Text debugText;
+	sf::Font debugFont;
 };

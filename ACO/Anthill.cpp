@@ -3,7 +3,12 @@
 
 Anthill::Anthill(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr) : Agent(filename, startingIndex, mapPtr)
 {
-
+	debugFont.loadFromFile("./Assets/arial.ttf");
+	debugText.setFont(debugFont);
+	debugText.setCharacterSize(18);
+	debugText.setFillColor(sf::Color::White);
+	debugText.setOutlineThickness(2);
+	debugText.setOutlineColor(sf::Color::Black);
 }
 
 Anthill::~Anthill()
@@ -12,38 +17,87 @@ Anthill::~Anthill()
 
 void Anthill::FindFood()
 {
+	debugDraw.clear();
+
 	std::cout << "Finding Food" << std::endl;
-
-	std::vector<HexData*> antPath;
-	std::vector<HexData*> neighbors;
-	sf::Vector2i antPos(positionIndex);
-	bool done = false;
-
-	//startpoint
-	antPath.push_back(map->GetHexDatByIndex(antPos.x, antPos.y));
+	float optimalPath = 30;
+	float rho = 0.2f;	
+	
 
 	for(int i = 0; i < numberOfAnts; ++i)
 	{
-		//Traverse - Begin
-		neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
+		std::vector<HexData*> antPath;
+		std::vector<HexData*> neighbors;
+		sf::Vector2i antPos(positionIndex);
+		bool foundFood = false;
 
-		while(!done)
+		//startpoint
+		antPath.push_back(map->GetHexDatByIndex(antPos.x, antPos.y));
+
+		//Traverse - Begin
+
+		while(!foundFood)
 		{
-			GetNextField(neighbors, antPath);
-			done = true;
+			neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
+			HexData* nextField = GetNextField(neighbors, antPath);
+			if(nextField == nullptr)
+			{
+				//No more options
+				break;
+			}
+
+			antPos = nextField->index;
+			antPath.push_back(nextField);
+
+			if(foodSources.find({antPos.x, antPos.y}) != foodSources.end())
+			{
+				foundFood = true;
+			}
 		}
 
+		//debugDraw.insert(debugDraw.begin(), antPath.begin(), antPath.end());
 		//Traverse - End
+		//Mark - Begin
+
+		if(foundFood)
+		{
+			for(auto h : antPath)
+			{
+				h->pheromones += optimalPath / static_cast<float>(antPath.size());
+			}
+		}
+
+
+		//Mark - End
 	}
+
+
+	//Evaporation - Begin
+
+	for (auto line : *map->GetMapPtr())
+	{
+		for (auto h : line)
+		{
+			if (h->pheromones > 0.001f)
+			{
+				h->pheromones = (1 - rho) * h->pheromones;
+			} else
+			{
+				h->pheromones = 0.0f;
+			}
+		}
+	}
+
+
+	//Evaporation - End
+
 }
 
 HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std::vector<HexData*>& visited)
 {
 	HexData* nextField = nullptr;
 	std::vector<std::pair<float, HexData*>> possibleFields;
-
-	std::cout << "Neighbors: " << neighbors.size() << std::endl;
-	std::cout << "Visited: " << visited.size() << std::endl;
+	possibleFields.reserve(6);
 
 	//Find scaling factor
 	float scalingFactor = 0;
@@ -59,7 +113,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 				pher = 0.00001f;
 			}
 
-			scalingFactor += (pher * n->terrain);
+			scalingFactor += (pher * (1.0f/n->terrain));
 
 		}
 	}
@@ -77,7 +131,7 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 				pher = 0.00001f;
 			}
 
-			p = (pher * n->terrain) / (scalingFactor);
+			p = (pher * (1.0f / n->terrain)) / (scalingFactor);
 
 			possibleFields.push_back({ p, n });
 		}
@@ -86,14 +140,11 @@ HexData* Anthill::GetNextField(const std::vector<HexData*>& neighbors, const std
 	//Choose random field by possibility
 	float randVal = (static_cast<double>(rand()) / (RAND_MAX));
 
-	std::cout << randVal << std::endl;
 
 	for(const auto& f : possibleFields)
 	{
-		std::cout << "Field: " << f.second->index.x << " " << f.second->index.y << " Possibility: " << f.first << std::endl;
 		if(randVal < f.first)
 		{
-			std::cout << "Next field is " << f.second->index.x << " " << f.second->index.y << std::endl;
 			nextField = f.second;
 			break;
 		} 
@@ -138,11 +189,48 @@ void Anthill::Render(sf::RenderWindow* window)
 {
 	Agent::Render(window);
 
+	//Pheremone Color
+	Hexagon pheromoneHex;
+	for(auto line : *map->GetMapPtr())
+	{
+		for(auto h : line)
+		{
+			if(h->pheromones > 0.0f)
+			{
+				pheromoneHex = *h->hex;
+				pheromoneHex.setOutlineColor(sf::Color::Transparent);
+				float alpha = std::min((255.0f * (h->pheromones / static_cast<float>(numberOfAnts))), 255.0f);
+				pheromoneHex.setFillColor(sf::Color(127, 0, 255, alpha));
+				window->draw(pheromoneHex);
+			}
+		}
+	}
+
 	//Render Food
 	for(auto it = foodSources.begin(); it != foodSources.end(); ++it)
 	{
 		it->second->Render(window);
 	}
+
+
+
+	//Hexagon drawhex;
+	//for(auto it = debugDraw.begin(); it != debugDraw.end(); ++it)
+	//{
+	//	drawhex = *(*it)->hex;
+	//	drawhex.setFillColor(sf::Color(255,0,0,255.0f/1.0f));
+	//	window->draw(drawhex);
+	//}
+}
+
+void Anthill::Move()
+{
+	FindFood();
+}
+
+void Anthill::DebugRender(sf::RenderWindow* window)
+{
+
 }
 
 void Anthill::SpawnFood(const sf::Vector2i& pos)

@@ -40,6 +40,7 @@ private:
 	void DebugRenderIndices(sf::RenderWindow *window);
 	void DebugRenderThreat(sf::RenderWindow *window);
 	void DebugRenderDifficulty(sf::RenderWindow *window);
+	void DebugRenderPheromoneText(sf::RenderWindow* window);
 
 	int GetDifficulty(HexData* HexToTest);
 
@@ -72,4 +73,5 @@ private:
 	bool difficultyRenderFlag = false;
 	bool indicesRenderFlag = false;
 	bool threatRenderFlag = false;
+	bool pheromonesRenderFlag = false;
 };
