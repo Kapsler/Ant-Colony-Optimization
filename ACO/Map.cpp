@@ -17,22 +17,9 @@ Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 	debugText.setOutlineColor(sf::Color::Black);
 }
 
-Map::~Map()
-{
-	for (auto line : hexMap)
-	{
-		for (auto hex : line)
-		{
-			delete hex;
-		}
-	}
-}
-
 void Map::Render(sf::RenderWindow* window)
 {
 	ResetThreat(nullptr);
-
-	sf::Color r = sf::Color::Red;
 
 	for (const auto line : hexMap)
 	{
@@ -65,6 +52,10 @@ void Map::DebugRender(sf::RenderWindow* window)
 	if (threatRenderFlag)
 	{
 		DebugRenderThreat(window);
+	}
+	if (pheromonesRenderFlag)
+	{
+		DebugRenderPheromoneText(window);
 	}
 
 }
@@ -117,14 +108,28 @@ void Map::DebugRenderDifficulty(sf::RenderWindow* window)
 	}
 }
 
+void Map::DebugRenderPheromoneText(sf::RenderWindow* window)
+{
+	for (const auto line : hexMap)
+	{
+		for (const auto hexdat : line)
+		{
+			debugText.setPosition(hexdat->hex->getPosition());
+			debugText.setString(std::to_string(static_cast<int>(hexdat->pheromones)));
+			debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
+			window->draw(debugText);
+		}
+	}
+}
+
 std::vector<HexData*> Map::GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap)
 {
 	std::vector<HexData*> neighbors;
+	neighbors.reserve(6);
 
 	sf::Vector2i evenOffsets[6] = { sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(+1,-1), sf::Vector2i(+1, +1) };
 	sf::Vector2i oddOffsets[6] = { sf::Vector2i(0,1), sf::Vector2i(1,0), sf::Vector2i(0,-1), sf::Vector2i(-1,0), sf::Vector2i(-1,+1), sf::Vector2i(-1, -1) };
 
-	Hexagon drawSelected;
 	sf::Vector2i* offsets = current->index.y % 2 == 0 ? evenOffsets : oddOffsets;
 
 	for (auto i = 0; i < 6; ++i)
@@ -222,18 +227,28 @@ void Map::HandleKeyboard(sf::Keyboard::Key key)
 		indicesRenderFlag = false;
 		threatRenderFlag = false;
 		difficultyRenderFlag = !difficultyRenderFlag;
+		pheromonesRenderFlag = false;
 	}
 	else if (key == sf::Keyboard::Key::T)
 	{
 		difficultyRenderFlag = false;
 		indicesRenderFlag = false;
 		threatRenderFlag = !threatRenderFlag;
+		pheromonesRenderFlag = false;
 	}
 	if (key == sf::Keyboard::Key::I)
 	{
 		difficultyRenderFlag = false;
 		threatRenderFlag = false;
 		indicesRenderFlag = !indicesRenderFlag;
+		pheromonesRenderFlag = false;
+	}
+	if (key == sf::Keyboard::Key::P)
+	{
+		difficultyRenderFlag = false;
+		threatRenderFlag = false;
+		indicesRenderFlag = false;
+		pheromonesRenderFlag = !pheromonesRenderFlag;
 	}
 }
 

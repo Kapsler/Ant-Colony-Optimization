@@ -12,7 +12,6 @@ class Map : public Renderable, public Interactive
 {
 public:
 	explicit Map(float screenWidth, float screenHeight, const std::string& filename);
-	virtual ~Map();
 
 	void Render(sf::RenderWindow* window) override;
 	void DebugRender(sf::RenderWindow* window) override;
@@ -30,6 +29,8 @@ public:
 	std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore);
 	std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 
+	static const int unpassable = 1000;
+
 private:
 	void GenerateFromImage(float screenWidth, float screenHeight, const sf::Image& mapImage);
 	static float distanceBetweenFloatPoints(const sf::Vector2f& p1, const sf::Vector2f& p2);
@@ -38,6 +39,7 @@ private:
 	void DebugRenderIndices(sf::RenderWindow *window);
 	void DebugRenderThreat(sf::RenderWindow *window);
 	void DebugRenderDifficulty(sf::RenderWindow *window);
+	void DebugRenderPheromoneText(sf::RenderWindow* window);
 
 	int GetDifficulty(HexData* HexToTest);
 
@@ -56,7 +58,6 @@ private:
 	sf::Color streetColor = sf::Color(130, 130, 130);
 	sf::Color notfoundColor = sf::Color::Magenta;
 
-	static const int unpassable = 1000;
 	int notfoundDifficulty = 1000;
 	int waterDifficulty = 1000;
 	int grassDifficulty = 3;
@@ -71,4 +72,5 @@ private:
 	bool difficultyRenderFlag = false;
 	bool indicesRenderFlag = false;
 	bool threatRenderFlag = false;
+	bool pheromonesRenderFlag = false;
 };
