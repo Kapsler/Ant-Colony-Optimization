@@ -9,9 +9,9 @@
 #include <chrono>
 #include "Anthill.h"
 
-const bool vsync = false;
+const bool vsync = true;
 const float screenWidth = 1000;
-const float screenHeight = 700;
+const float screenHeight = 720;
 
 sf::RenderWindow *window;
 std::vector<Renderable*> toRender;
@@ -102,11 +102,9 @@ int main()
 
 		}
 
-	
-
 		//Movement
 		moveDelay += deltaTime;
-		if (moveDelay > 0.0001f)
+		if (moveDelay > 0.001f)
 		{
 			for (auto& m : toMove)
 			{
@@ -119,11 +117,13 @@ int main()
 
 		window->clear();
 
+		//Render Sprites and such
 		for(const auto& r : toRender)
 		{
 			r->Render(window);
 		}
 
+		//Render Debug Stuff ontop
 		for(const auto& r : toRender)
 		{
 			r->DebugRender(window);

@@ -60,10 +60,10 @@ private:
 
 	int notfoundDifficulty = 1000;
 	int waterDifficulty = 1000;
-	int grassDifficulty = 3;
+	int grassDifficulty = 10;
 	int earthDifficulty = 1;
-	int sandDifficulty = 5;
-	int streetDifficulty = 10;
+	int sandDifficulty = 50;
+	int streetDifficulty = 200;
 
 	sf::Text debugText;
 	sf::Font debugFont;

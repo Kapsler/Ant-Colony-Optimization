@@ -17,10 +17,7 @@ Anthill::~Anthill()
 
 void Anthill::FindFood()
 {
-	debugDraw.clear();
-
 	float optimalPath = FindOptimalPath();
-	float rho = 0.2f;
 	std::vector<std::vector<HexData*>> doubleBuffer;
 	std::vector<std::vector<HexData*>> mapptr = *(map->GetMapPtr());
 
@@ -138,7 +135,6 @@ HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unor
 
 	//Find scaling factor
 	float scalingFactor = 0;
-	float a = 1.5f, b = 1.0f;
 
 	auto it = neighbors.begin();
 	while(it != neighbors.end())
