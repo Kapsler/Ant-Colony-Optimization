@@ -17,7 +17,35 @@ inline double fastPow(double a, double b) {
 		double d;
 		int x[2];
 	} u = { a };
-	u.x[1] = (int)(b * (u.x[1] - 1072632447) + 1072632447);
+	u.x[1] = static_cast<int>(b * (u.x[1] - 1072632447) + 1072632447);
 	u.x[0] = 0;
 	return u.d;
+}
+
+static unsigned long x = 123456789, y = 362436069, z = 521288629;
+
+inline unsigned long XorRng() 
+{
+	unsigned long t;
+
+	x ^= x << 16;
+	x ^= x >> 5;
+	x ^= x << 1;
+
+	t = x;
+	x = y;
+	y = z;
+	z = t ^ x ^ y;
+
+	return z;
+}
+
+inline int GetManhattenDistance(const sf::Vector2i& a, const sf::Vector2i& b)
+{
+	int dx, dy;
+
+	dx = b.x - a.x;
+	dy = b.y - a.y;
+
+	return abs(dx) + abs(dy);
 }

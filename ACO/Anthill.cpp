@@ -178,8 +178,7 @@ HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unor
 	}
 
 	//Choose random field by possibility
-	float randVal = (static_cast<double>(rand()) / (RAND_MAX));
-
+	float randVal = XorRng() / (ULONG_MAX + 1.0f);
 
 	for(const auto& f : possibleFields)
 	{
@@ -223,24 +222,37 @@ void Anthill::HandleMouse(sf::Mouse::Button mb)
 
 void Anthill::Render(sf::RenderWindow* window)
 {
-	Agent::Render(window);
-
 	//Pheremone Color
 	Hexagon pheromoneHex;
-	for(auto line : *map->GetMapPtr())
+
+	float maxPheromone = 0.000001;
+	for (const auto& line : *map->GetMapPtr())
 	{
-		for(auto h : line)
+		for (const auto& h : line)
+		{
+			if (h->pheromones > maxPheromone)
+			{
+				maxPheromone = h->pheromones;
+			}
+		}
+	}
+
+	for(const auto& line : *map->GetMapPtr())
+	{
+		for(const auto& h : line)
 		{
 			if(h->pheromones > 0.0f)
 			{
 				pheromoneHex = *h->hex;
 				pheromoneHex.setOutlineColor(sf::Color::Transparent);
-				float alpha = std::min(255.0f * (h->pheromones / static_cast<float>(numberOfAnts)), 255.0f);
+				float alpha = std::min(255.0f * (h->pheromones / maxPheromone), 255.0f);
 				pheromoneHex.setFillColor(sf::Color(127, 0, 255, alpha));
 				window->draw(pheromoneHex);
 			}
 		}
 	}
+
+	Agent::Render(window);
 
 	//Render Food
 	for(auto it = foodSources.begin(); it != foodSources.end(); ++it)
@@ -282,7 +294,7 @@ int Anthill::FindOptimalPath()
 
 	for(auto it = foodSources.begin(); it != foodSources.end(); ++it)
 	{
-		int pathlength = map->AStarPath(map->GetHexDatByIndex(positionIndex.x, positionIndex.y), map->GetHexDatByIndex(it->first.first, it->first.second), *map->GetMapPtr(), nullptr).size();
+		int pathlength = GetManhattenDistance(positionIndex, it->second->GetPositionIndex());
 
 		if(pathlength < shortestPath)
 		{
