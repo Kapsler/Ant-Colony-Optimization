@@ -8,9 +8,10 @@ class Anthill : public Agent, public Interactive
 public:
 	//Parameters
 	const int numberOfAnts = 1000;
-	const float rho = 0.15f;
+	const float rho = 0.3f;
 	const float a = 1.7f;
-	const float b = 1.0f;
+	const float b = 1.3f;
+	const float pheromoneEpsilon = 0.0001f;
 
 	Anthill(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr);
 	~Anthill();
