@@ -7,11 +7,11 @@ class Anthill : public Agent, public Interactive
 {
 public:
 	//Parameters
-	const int numberOfAnts = 1000;
-	const float rho = 0.3f;
+	const int numberOfAnts = 2000;
+	const float rho = 0.15f;
 	const float a = 1.7f;
-	const float b = 1.3f;
-	const float pheromoneEpsilon = 0.0001f;
+	const float b = 1.5f;
+	const float pheromoneEpsilon = 0.01f;
 
 	Anthill(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr);
 	~Anthill();
@@ -29,9 +29,11 @@ public:
 	void SpawnFood(const sf::Vector2i& pos);
 	void DeleteFood(const sf::Vector2i& pos);
 
-	int FindOptimalPath();
+	int OptimalPathHeuristic();
+	void FindOptimalPheromonePath(std::vector<HexData*>& out);
 
 	std::unordered_map<std::pair<int, int>, Agent*, SimpleHash> foodSources;
+	std::vector<HexData*> Astarpath;
 
 	sf::Text debugText;
 	sf::Font debugFont;

@@ -10,8 +10,8 @@
 #include "Anthill.h"
 
 const bool vsync = true;
-const float screenWidth = 1000;
-const float screenHeight = 720;
+const float screenWidth = 2000;
+const float screenHeight = 1440;
 
 sf::RenderWindow *window;
 std::vector<Renderable*> toRender;
@@ -20,11 +20,11 @@ std::vector<Moving*> toMove;
 
 void GenerateWorld()
 {
-	Map* map = new Map(screenWidth, screenHeight, "./Assets/terrain50x30.png");
+	Map* map = new Map(screenWidth, screenHeight, "./Assets/terrain100x60.png");
 	toRender.push_back(map);
 	toInteract.push_back(map);
 
-	Anthill* anthill = new Anthill("./Assets/anthill.png", sf::Vector2i(20, 12), map);
+	Anthill* anthill = new Anthill("./Assets/anthill.png", sf::Vector2i(11, 14), map);
 	toRender.push_back(anthill);
 	toInteract.push_back(anthill);
 	toMove.push_back(anthill);

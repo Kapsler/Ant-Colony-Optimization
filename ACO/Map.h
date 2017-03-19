@@ -27,6 +27,7 @@ public:
 	void AddThreat(Agent* threat);
 	void ResetThreat(Agent* toIgnore);
 	std::vector<HexData*> AStarPath(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore);
+	std::vector<HexData*> AStarPathPheromones(HexData* start, HexData* finish, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore);
 	std::vector<HexData*> GetNeighbors(HexData* current, std::vector<std::vector<HexData*>> &usedMap);
 
 	static const int unpassable = 1000;
@@ -42,6 +43,7 @@ private:
 	void DebugRenderPheromoneText(sf::RenderWindow* window);
 
 	int GetDifficulty(HexData* HexToTest);
+	float GetDifficultyPheromones(HexData* HexToTest);
 
 	std::vector<std::vector<HexData*>> hexMap;
 	HexData* selectedHexDat = nullptr;

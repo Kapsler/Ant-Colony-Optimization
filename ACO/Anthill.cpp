@@ -17,7 +17,7 @@ Anthill::~Anthill()
 
 void Anthill::FindFood()
 {
-	float optimalPath = FindOptimalPath();
+	float optimalPath = OptimalPathHeuristic();
 	std::vector<std::vector<HexData*>> doubleBuffer;
 	std::vector<std::vector<HexData*>> mapptr = *(map->GetMapPtr());
 
@@ -59,8 +59,8 @@ void Anthill::FindFood()
 
 			while(!foundFood)
 			{
-				possibleFields.clear();
 				neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
+				possibleFields.clear();
 				HexData* nextField = GetNextField(neighbors, cameFrom, possibleFields);
 				if(nextField == nullptr)
 				{
@@ -83,14 +83,18 @@ void Anthill::FindFood()
 			//Mark - Begin
 			if(foundFood)
 			{
-				float pherValue = (optimalPath * (1.0f / (allTerrains / static_cast<float>(cameFrom.size()))));
+				//Using average terrain cost in heurstic
+				float pherValue = (optimalPath * (1.0f / (allTerrains / static_cast<float>(cameFrom.size())))) / static_cast<float>(cameFrom.size());
 				//float pherValue = (optimalPath / static_cast<float>(cameFrom.size()));
 
 				for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
 				{
-					#pragma omp critical
+					if(it->first != nullptr)
 					{
-						doubleBuffer[it->second->index.x][it->second->index.y]->pheromones += pherValue;
+						#pragma omp critical
+						{
+							doubleBuffer[it->second->index.x][it->second->index.y]->pheromones += pherValue;
+						}
 					}
 				}
 			}
@@ -127,8 +131,9 @@ void Anthill::FindFood()
 		}
 	}
 
-
 	//Evaporation - End
+
+	FindOptimalPheromonePath(Astarpath);
 
 }
 
@@ -178,7 +183,7 @@ HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unor
 
 	//Choose random field by possibility
 	float randVal = XorRng() / (ULONG_MAX + 1.0f);
-
+	
 	for(const auto& f : possibleFields)
 	{
 		if(randVal < f.first)
@@ -222,7 +227,7 @@ void Anthill::HandleMouse(sf::Mouse::Button mb)
 void Anthill::Render(sf::RenderWindow* window)
 {
 	//Pheremone Color
-	Hexagon pheromoneHex;
+	Hexagon renderHex;
 
 	float maxPheromone = pheromoneEpsilon;
 	for (const auto& line : *map->GetMapPtr())
@@ -236,17 +241,24 @@ void Anthill::Render(sf::RenderWindow* window)
 		}
 	}
 
+	for (const auto h : Astarpath)
+	{
+		renderHex = *h->hex;
+		renderHex.setOutlineColor(sf::Color::Red);
+		window->draw(renderHex);
+	}
+
 	for(const auto& line : *map->GetMapPtr())
 	{
 		for(const auto& h : line)
 		{
 			if(h->pheromones > 0.0f)
 			{
-				pheromoneHex = *h->hex;
-				pheromoneHex.setOutlineColor(sf::Color::Transparent);
+				renderHex = *h->hex;
+				renderHex.setOutlineColor(sf::Color::Transparent);
 				float alpha = std::min(255.0f * (h->pheromones / maxPheromone), 255.0f);
-				pheromoneHex.setFillColor(sf::Color(127, 0, 255, alpha));
-				window->draw(pheromoneHex);
+				renderHex.setFillColor(sf::Color(127, 0, 255, alpha));
+				window->draw(renderHex);
 			}
 		}
 	}
@@ -267,7 +279,7 @@ void Anthill::Move()
 
 void Anthill::DebugRender(sf::RenderWindow* window)
 {
-
+	
 }
 
 void Anthill::SpawnFood(const sf::Vector2i& pos)
@@ -287,7 +299,7 @@ void Anthill::DeleteFood(const sf::Vector2i& pos)
 
 }
 
-int Anthill::FindOptimalPath()
+int Anthill::OptimalPathHeuristic()
 {
 	int shortestPath = INT_MAX;
 
@@ -303,4 +315,21 @@ int Anthill::FindOptimalPath()
 	}
 
 	return shortestPath;
+}
+
+void Anthill::FindOptimalPheromonePath(std::vector<HexData*>& out)
+{
+	out.clear();
+	int shortestPath = INT_MAX;
+	std::vector<HexData*> newPath;
+	for (auto it = foodSources.begin(); it != foodSources.end(); ++it)
+	{
+		newPath = map->AStarPathPheromones(map->GetHexDatByIndex(positionIndex.x, positionIndex.y), map->GetHexDatByIndex(it->second->GetPositionIndex().x, it->second->GetPositionIndex().y), *map->GetMapPtr(), nullptr);
+
+		if (newPath.size() < shortestPath)
+		{
+			shortestPath = newPath.size();
+			out = newPath;
+		}
+	}
 }

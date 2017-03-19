@@ -4,6 +4,7 @@
 #include <memory>
 #include <iostream>
 #include "Agent.h"
+#include "Anthill.h"
 
 Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 {
@@ -214,9 +215,83 @@ std::vector<HexData*> Map::AStarPath(HexData* start, HexData* target, std::vecto
 	return foundPath;
 }
 
+std::vector<HexData*> Map::AStarPathPheromones(HexData* start, HexData* target, std::vector<std::vector<HexData*>> &usedMap, Agent* toIgnore)
+{
+	ResetThreat(toIgnore);
+
+	//Breadth Search
+	std::vector<HexData*> foundPath;
+	std::unordered_map<HexData*, HexData*> cameFrom;
+	std::unordered_map<HexData*, int> costsSoFar;
+	std::multimap<float, HexData*> priorityToDo;
+
+	priorityToDo.insert(std::pair<float, HexData*>(0.0f, start));
+	cameFrom.insert_or_assign(start, nullptr);
+	costsSoFar.insert_or_assign(start, 0);
+
+	HexData* currentHex;
+
+	while (!priorityToDo.empty())
+	{
+		currentHex = priorityToDo.begin()->second;
+		priorityToDo.erase(priorityToDo.begin());
+
+		if (currentHex == target)
+		{
+			break;
+		}
+
+		for (HexData* neighbor : GetNeighbors(currentHex, usedMap))
+		{
+			float difficulty = GetDifficultyPheromones(neighbor);
+			int newCosts = costsSoFar[currentHex] + difficulty;
+
+
+			if (costsSoFar.find(neighbor) == costsSoFar.end() || newCosts < costsSoFar.at(neighbor))
+			{
+				costsSoFar.insert_or_assign(neighbor, newCosts);
+				float priority = newCosts;
+				priorityToDo.insert(std::pair<float, HexData*>(priority, neighbor));
+				cameFrom.insert_or_assign(neighbor, currentHex);
+			}
+		}
+	}
+
+	//Build Path
+	currentHex = target;
+	foundPath.push_back(currentHex);
+
+	while (currentHex != start)
+	{
+		if (cameFrom.find(currentHex) != cameFrom.end())
+		{
+			currentHex = cameFrom.at(currentHex);
+			foundPath.push_back(currentHex);
+		}
+		else
+		{
+			foundPath.clear();
+			return foundPath;
+		}
+	}
+
+	std::reverse(foundPath.begin(), foundPath.end());
+
+	return foundPath;
+}
+
 int Map::GetDifficulty(HexData* HexToTest)
 {
 	return HexToTest->terrain + HexToTest->threat;
+}
+
+float Map::GetDifficultyPheromones(HexData* HexToTest)
+{
+	if(HexToTest->pheromones == 0.0f)
+	{
+		return 1000.0f / 0.0001;
+	}
+	return (1000.0f/HexToTest->pheromones);
 }
 
 
