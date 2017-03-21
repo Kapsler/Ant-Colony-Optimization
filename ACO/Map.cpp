@@ -12,7 +12,7 @@ Map::Map(float screenWidth, float screenHeight, const std::string& filename)
 
 	debugFont.loadFromFile("./Assets/arial.ttf");
 	debugText.setFont(debugFont);
-	debugText.setCharacterSize(18);
+	debugText.setCharacterSize(9);
 	debugText.setFillColor(sf::Color::White);
 	debugText.setOutlineThickness(2);
 	debugText.setOutlineColor(sf::Color::Black);

@@ -84,7 +84,7 @@ void Anthill::FindFood()
 			if(foundFood)
 			{
 				//Using average terrain cost in heurstic
-				float pherValue = (optimalPath * (1.0f / (allTerrains / static_cast<float>(cameFrom.size())))) / static_cast<float>(cameFrom.size());
+				float pherValue = 10.0f * (optimalPath * (10.0f / (fastPow(allTerrains / static_cast<float>(cameFrom.size()), 2))) / static_cast<float>(cameFrom.size()));
 				//float pherValue = (optimalPath / static_cast<float>(cameFrom.size()));
 
 				for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
