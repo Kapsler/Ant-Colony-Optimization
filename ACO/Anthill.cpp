@@ -206,7 +206,10 @@ HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unor
 
 void Anthill::HandleKeyboard(sf::Keyboard::Key key)
 {
-
+	if(key == sf::Keyboard::Key::O)
+	{
+		renderPheromoneFlag = !renderPheromoneFlag;
+	}
 }
 
 void Anthill::HandleMouse(sf::Vector2f& mousePosition)
@@ -235,6 +238,7 @@ void Anthill::Render(sf::RenderWindow* window)
 	//Pheremone Color
 	Hexagon renderHex;
 
+	//Get Max Pheromone Value
 	float maxPheromone = pheromoneEpsilon;
 	for (const auto& line : *map->GetMapPtr())
 	{
@@ -247,6 +251,7 @@ void Anthill::Render(sf::RenderWindow* window)
 		}
 	}
 
+	//Render A* Path
 	for (const auto h : Astarpath)
 	{
 		renderHex = *h->hex;
@@ -254,17 +259,21 @@ void Anthill::Render(sf::RenderWindow* window)
 		window->draw(renderHex);
 	}
 
-	for(const auto& line : *map->GetMapPtr())
+	//Render Pheromones
+	if(renderPheromoneFlag)
 	{
-		for(const auto& h : line)
+		for (const auto& line : *map->GetMapPtr())
 		{
-			if(h->pheromones > 0.0f)
+			for (const auto& h : line)
 			{
-				renderHex = *h->hex;
-				renderHex.setOutlineColor(sf::Color::Transparent);
-				float alpha = std::min(255.0f * (h->pheromones / maxPheromone), 255.0f);
-				renderHex.setFillColor(sf::Color(127, 0, 255, alpha));
-				window->draw(renderHex);
+				if (h->pheromones > 0.0f)
+				{
+					renderHex = *h->hex;
+					renderHex.setOutlineColor(sf::Color::Transparent);
+					float alpha = std::min(255.0f * (h->pheromones / maxPheromone), 255.0f);
+					renderHex.setFillColor(sf::Color(127, 0, 255, alpha));
+					window->draw(renderHex);
+				}
 			}
 		}
 	}

@@ -41,4 +41,6 @@ public:
 	sf::Font debugFont;
 
 	std::vector<RNGesus> geez;
+
+	bool renderPheromoneFlag = false;
 };
