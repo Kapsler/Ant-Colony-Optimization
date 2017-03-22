@@ -1,5 +1,6 @@
 #include "Anthill.h"
 #include <iostream>
+#include <chrono>
 
 Anthill::Anthill(const std::string filename, sf::Vector2i startingIndex, Map* mapPtr) : Agent(filename, startingIndex, mapPtr)
 {
@@ -9,6 +10,11 @@ Anthill::Anthill(const std::string filename, sf::Vector2i startingIndex, Map* ma
 	debugText.setFillColor(sf::Color::White);
 	debugText.setOutlineThickness(2);
 	debugText.setOutlineColor(sf::Color::Black);
+
+	for(unsigned int i = 0; i < 16; ++i)
+	{
+		geez.push_back(RNGesus(i, std::chrono::high_resolution_clock::now().time_since_epoch().count(), std::chrono::high_resolution_clock::now().time_since_epoch().count() << i));
+	}
 }
 
 Anthill::~Anthill()
@@ -84,7 +90,7 @@ void Anthill::FindFood()
 			if(foundFood)
 			{
 				//Using average terrain cost in heurstic
-				float pherValue = 10.0f * (optimalPath * (10.0f / (fastPow(allTerrains / static_cast<float>(cameFrom.size()), 2))) / static_cast<float>(cameFrom.size()));
+				float pherValue = (optimalPath * (1.0f / (fastPow(allTerrains / static_cast<float>(cameFrom.size()), 2))) / static_cast<float>(cameFrom.size()));
 				//float pherValue = (optimalPath / static_cast<float>(cameFrom.size()));
 
 				for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
@@ -182,7 +188,7 @@ HexData* Anthill::GetNextField(std::vector<HexData*>& neighbors, const std::unor
 	}
 
 	//Choose random field by possibility
-	float randVal = XorRng() / (ULONG_MAX + 1.0f);
+	float randVal = geez[omp_get_thread_num()].GetNumber() / (ULONG_MAX + 1.0f);
 	
 	for(const auto& f : possibleFields)
 	{

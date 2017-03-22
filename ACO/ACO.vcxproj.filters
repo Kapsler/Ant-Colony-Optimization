@@ -39,6 +39,9 @@
     <ClCompile Include="Anthill.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RNGesus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Hexagon.h">
@@ -75,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RNGesus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

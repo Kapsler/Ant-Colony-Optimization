@@ -155,6 +155,7 @@
     <ClCompile Include="Hexagon.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="RNGesus.cpp" />
     <ClCompile Include="ThreatStencil.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,7 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="Moving.h" />
     <ClInclude Include="Renderable.h" />
+    <ClInclude Include="RNGesus.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="ThreatStencil.h" />
   </ItemGroup>

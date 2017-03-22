@@ -2,12 +2,14 @@
 #include "Agent.h"
 #include <unordered_map>
 #include "Utility.h"
+#include "RNGesus.h"
+#include <omp.h>
 
 class Anthill : public Agent, public Interactive
 {
 public:
 	//Parameters
-	const int numberOfAnts = 2000;
+	const int numberOfAnts = 1000;
 	const float rho = 0.15f;
 	const float a = 1.7f;
 	const float b = 1.5f;
@@ -37,4 +39,6 @@ public:
 
 	sf::Text debugText;
 	sf::Font debugFont;
+
+	std::vector<RNGesus> geez;
 };
