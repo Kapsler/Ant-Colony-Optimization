@@ -75,4 +75,7 @@ private:
 	bool indicesRenderFlag = false;
 	bool threatRenderFlag = false;
 	bool pheromonesRenderFlag = false;
+
+	sf::RenderTexture maptex;
+	sf::Sprite map;
 };

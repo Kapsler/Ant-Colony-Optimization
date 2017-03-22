@@ -22,14 +22,7 @@ void Map::Render(sf::RenderWindow* window)
 {
 	ResetThreat(nullptr);
 
-	for (const auto line : hexMap)
-	{
-		for (const auto hexdat : line)
-		{
-			window->draw(*(hexdat->hex));
-
-		}
-	}
+	window->draw(map);
 
 	if (selectedHexDat != nullptr)
 	{
@@ -516,4 +509,17 @@ void Map::GenerateFromImage(float screenWidth, float screenHeight, const sf::Ima
 		offsetY = initialOffsetY + (i + 1) * (sizes.height() + outlineThickness);
 	}
 
+	maptex.create(screenWidth, screenHeight);
+
+	for (const auto line : hexMap)
+	{
+		for (const auto hexdat : line)
+		{
+			maptex.draw(*(hexdat->hex));
+		}
+	}
+
+	maptex.display();
+
+	map.setTexture(maptex.getTexture());
 }

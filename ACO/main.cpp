@@ -9,7 +9,7 @@
 #include <chrono>
 #include "Anthill.h"
 
-const bool vsync = true;
+const bool vsync = false;
 const float screenWidth = 2000;
 const float screenHeight = 1440;
 
