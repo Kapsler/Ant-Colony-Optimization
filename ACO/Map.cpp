@@ -108,10 +108,13 @@ void Map::DebugRenderPheromoneText(sf::RenderWindow* window)
 	{
 		for (const auto hexdat : line)
 		{
-			debugText.setPosition(hexdat->hex->getPosition());
-			debugText.setString(std::to_string(static_cast<int>(hexdat->pheromones)));
-			debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
-			window->draw(debugText);
+			if(hexdat->pheromones > 0.0f)
+			{
+				debugText.setPosition(hexdat->hex->getPosition());
+				debugText.setString(std::to_string(static_cast<int>(hexdat->pheromones)));
+				debugText.setOrigin(debugText.getGlobalBounds().width / 2.0f, debugText.getGlobalBounds().height / 2.0f);
+				window->draw(debugText);
+			}
 		}
 	}
 }
@@ -280,11 +283,11 @@ int Map::GetDifficulty(HexData* HexToTest)
 
 float Map::GetDifficultyPheromones(HexData* HexToTest)
 {
-	if(HexToTest->pheromones == 0.0f)
+	if(HexToTest->pheromones > 0.0f)
 	{
-		return 1000.0f / 0.0001;
+		return (1000.0f / HexToTest->pheromones);
 	}
-	return (1000.0f/HexToTest->pheromones);
+	return 100000.0f;
 }
 
 

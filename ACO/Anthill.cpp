@@ -43,72 +43,66 @@ void Anthill::FindFood()
 		}
 	}
 
-	#pragma omp parallel 
+	#pragma omp parallel for
+	for(int i = 0; i < numberOfAnts; ++i)
 	{
-	
-		#pragma omp for
-		for(int i = 0; i < numberOfAnts; ++i)
+		std::unordered_map<HexData*, HexData*> cameFrom;
+		std::vector<HexData*> neighbors;
+		sf::Vector2i antPos(positionIndex);
+		bool foundFood = false;
+		float allTerrains = 0.0f;
+
+		//startpoint
+		cameFrom.insert_or_assign(nullptr, map->GetHexDatByIndex(antPos.x, antPos.y));
+
+		//Traverse - Begin
+
+		std::vector<std::pair<float, HexData*>> possibleFields;
+		possibleFields.reserve(6);
+
+		while(!foundFood)
 		{
-			std::unordered_map<HexData*, HexData*> cameFrom;
-			std::vector<HexData*> neighbors;
-			sf::Vector2i antPos(positionIndex);
-			bool foundFood = false;
-			float allTerrains = 0.0f;
-
-			//startpoint
-			cameFrom.insert_or_assign(nullptr, map->GetHexDatByIndex(antPos.x, antPos.y));
-
-			//Traverse - Begin
-
-			std::vector<std::pair<float, HexData*>> possibleFields;
-			possibleFields.reserve(6);
-
-			while(!foundFood)
+			neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
+			possibleFields.clear();
+			HexData* nextField = GetNextField(neighbors, cameFrom, possibleFields);
+			if(nextField == nullptr)
 			{
-				neighbors = map->GetNeighbors(map->GetHexDatByIndex(antPos.x, antPos.y), *map->GetMapPtr());
-				possibleFields.clear();
-				HexData* nextField = GetNextField(neighbors, cameFrom, possibleFields);
-				if(nextField == nullptr)
-				{
-					//No more options
-					break;
-				}
-
-				cameFrom.insert_or_assign(map->GetHexDatByIndex(antPos.x, antPos.y), nextField);
-				allTerrains += nextField->terrain;
-				antPos = nextField->index;
-
-				if(foodSources.find({antPos.x, antPos.y}) != foodSources.end())
-				{
-					foundFood = true;
-				}
+				//No more options
+				break;
 			}
 
-			//Traverse - End
+			cameFrom.insert_or_assign(map->GetHexDatByIndex(antPos.x, antPos.y), nextField);
+			allTerrains += nextField->terrain;
+			antPos = nextField->index;
 
-			//Mark - Begin
-			if(foundFood)
+			if(foodSources.find({antPos.x, antPos.y}) != foodSources.end())
 			{
-				//Using average terrain cost in heurstic
-				float pherValue = (optimalPath * (1.0f / (fastPow(allTerrains / static_cast<float>(cameFrom.size()), 2))) / static_cast<float>(cameFrom.size()));
-				//float pherValue = (optimalPath / static_cast<float>(cameFrom.size()));
+				foundFood = true;
+			}
+		}
 
-				for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
+		//Traverse - End
+
+		//Mark - Begin
+		if(foundFood)
+		{
+			//Using average terrain cost in heurstic
+			float pherValue = (optimalPath * (1.0f / (fastPow(allTerrains / static_cast<float>(cameFrom.size()), 2))) / static_cast<float>(cameFrom.size()));
+			//float pherValue = (optimalPath / static_cast<float>(cameFrom.size()));
+
+			for(auto it = cameFrom.begin(); it != cameFrom.end(); ++it)
+			{
+				if(it->first != nullptr)
 				{
-					if(it->first != nullptr)
+					#pragma omp critical
 					{
-						#pragma omp critical
-						{
-							doubleBuffer[it->second->index.x][it->second->index.y]->pheromones += pherValue;
-						}
+						doubleBuffer[it->second->index.x][it->second->index.y]->pheromones += pherValue;
 					}
 				}
 			}
-
-			//Mark - End
 		}
 
-
+		//Mark - End
 	}
 
 	for (int i = 0; i < doubleBuffer.size(); ++i)

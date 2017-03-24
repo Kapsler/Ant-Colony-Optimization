@@ -3,7 +3,7 @@
 class RNGesus
 {
 public:
-	RNGesus(const unsigned long& ix, const unsigned long& iy, const unsigned long& iz);
+	RNGesus(const unsigned long& xseed, const unsigned long& yseed, const unsigned long& zseed);
 
 	unsigned long GetNumber();
 

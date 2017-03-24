@@ -1,10 +1,10 @@
 #include "RNGesus.h"
 
-RNGesus::RNGesus(const unsigned long& ix, const unsigned long& iy, const unsigned long& iz)
+RNGesus::RNGesus(const unsigned long& xseed, const unsigned long& yseed, const unsigned long& zseed)
 {
-	x = ix;
-	y = iy;
-	z = iz;
+	x = xseed;
+	y = yseed;
+	z = zseed;
 }
 
 unsigned long RNGesus::GetNumber()
