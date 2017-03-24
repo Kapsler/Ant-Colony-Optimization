@@ -32,10 +32,10 @@ public:
 	void DeleteFood(const sf::Vector2i& pos);
 
 	int OptimalPathHeuristic();
-	void FindOptimalPheromonePath(std::vector<HexData*>& out);
+	void FindPheromonePaths(std::vector<HexData*>& out);
 
 	std::unordered_map<std::pair<int, int>, Agent*, SimpleHash> foodSources;
-	std::vector<HexData*> Astarpath;
+	std::vector<HexData*> Astarpaths;
 
 	sf::Text debugText;
 	sf::Font debugFont;
